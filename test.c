@@ -1,6 +1,42 @@
+#include <sys/types.h>
 #include <unistd.h>
-#include <stdio.h>
+#include <sys/wait.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <stdio.h>
+
+int ft_strlen_space(const char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] != ' ')
+		i++;
+	return (i);
+}
+
+int	ft_strlen(const char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+		i++;
+	return (i);
+}
+int	ft_strncmp(const char *s1, const char *s2, size_t n)
+{
+	size_t	i;
+
+	i = 0;
+	while ((s1[i] || s2[i]) && i < n)
+	{
+		if (s1[i] != s2[i])
+			return (((unsigned char *)s1)[i] - ((unsigned char *)s2)[i]);
+		i++;
+	}
+	return (0);
+}
 
 int	ft_count_words(const char *s, char c)
 {
@@ -79,44 +115,6 @@ char	**ft_split(char const *s, char c)
 	tab[k] = NULL;
 	return (ft_strcpy(tab, s, c));
 }
-int	ft_strlen(const char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-		i++;
-	return (i);
-}
-
-char	*ft_strdup(const char *s)
-{
-	int		i;
-	char	*s2;
-	int		size;
-
-	i = 0;
-	size = ft_strlen(s);
-	s2 = malloc((size + 1) * sizeof(char));
-	if (!s2)
-		return (NULL);
-	while (s[i])
-	{
-		s2[i] = s[i];
-		i++;
-	}
-	s2[i] = '\0';
-	return (s2);
-}
-int ft_strlen_space(const char *str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i] != ' ')
-		i++;
-	return (i);
-}
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	char	*tab;
@@ -125,21 +123,59 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	int		j;
 
 	j = 0;
-	i = 0;
-	len = ft_strlen(s1) + ft_strlen_space(s2);
+	i = 5;
+	len = ft_strlen(s1) + ft_strlen_space(s2) + 1 - 5;
 	tab = malloc((len + 1) * sizeof(char));
 	if (!tab)
 		return (NULL);
 	while (s1[i])
 		tab[j++] = s1[i++];
+	tab[j++] = '/';
 	i = 0;
-	while (s2[i] != ' ')
+	while (s2[i] && s2[i] != ' ')
 		tab[j++] = s2[i++];
 	tab[j] = '\0';
 	return (tab);
 }
-int main ()
+
+
+void	child_process(int fd1, char *cmd1, char *envp[])
 {
-	char cmd1[] = "cat";
-	printf("%s\n", ft_strjoin(ft_strdup("/usr/bin/"), cmd1));
+	char	**good_path;
+	char	*good_line_envp;
+	char	*good_cmd;
+	int		i;
+
+	i = 0;
+	while (1)
+	{
+		if (ft_strncmp("PATH", envp[i], 4) ==  0)
+			
+		{
+			good_line_envp = envp[i];
+			break;
+		}
+		i++;
+	}
+	printf("good_line du envp : %s\n", good_line_envp);
+	good_path = ft_split(good_line_envp, ':');
+	i = -1;
+	while (good_path[++i])
+	{
+		good_cmd = ft_strjoin(good_path[i], cmd1);
+		if (execve(good_cmd, ft_split(cmd1, ' '), envp) != -1)
+			break ;
+		//perror("execve");
+		free(good_cmd);
+	}
+	printf("good_cmd = %s\n", good_cmd);
+}
+int main(int argc, char *argv[], char *envp[])
+{
+	int		fd1;
+
+		fd1 = open(argv[1], O_RDONLY);
+	if (fd1 < 0)
+		printf("stop");
+	child_process(fd1, argv[2], envp);
 }
