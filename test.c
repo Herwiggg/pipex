@@ -10,7 +10,7 @@ int ft_strlen_space(const char *str)
 	int	i;
 
 	i = 0;
-	while (str[i] != ' ')
+	while (str[i] != ' ' && str[i])
 		i++;
 	return (i);
 }
@@ -123,8 +123,8 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	int		j;
 
 	j = 0;
-	i = 5;
-	len = ft_strlen(s1) + ft_strlen_space(s2) + 1 - 5;
+	i = 0;
+	len = ft_strlen(s1) + ft_strlen_space(s2) + 1;
 	tab = malloc((len + 1) * sizeof(char));
 	if (!tab)
 		return (NULL);
@@ -158,11 +158,19 @@ void	child_process(int fd1, char *cmd1, char *envp[])
 		i++;
 	}
 	printf("good_line du envp : %s\n", good_line_envp);
-	good_path = ft_split(good_line_envp, ':');
+	good_path = ft_split(&good_line_envp[5], ':');
 	i = -1;
+	printf("----------\n");
+	while(good_path[++i] != NULL)
+	{
+		printf("%s\n", good_path[i]);
+	}
+	i = -1;
+	printf("apres split");
 	while (good_path[++i])
 	{
 		good_cmd = ft_strjoin(good_path[i], cmd1);
+	//	printf("%s\n", good_cmd);
 		if (execve(good_cmd, ft_split(cmd1, ' '), envp) != -1)
 			break ;
 		//perror("execve");
