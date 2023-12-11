@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/10 01:06:02 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/11 23:23:44 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,33 +15,23 @@
 void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 {
 	int		end[2];
-	pid_t	child1;
-	pid_t	child2;
-	int 	status;
+	pid_t	child;
 	
 	if (pipe(end) == -1)
 		return ((perror("pipe")));
-	child1 = fork();
-	if (child1 == -1)
-		return ((perror("fork")));
-	if (child1 == 0)
+	child = fork();
+	if (child == -1)
+		return (perror("fork"));
+	if (child == 0)
 	{
-		child_process_one(pipes->fd1, cmd1, envp, end);
+		if (pipes->fd1 > 0)
+			child_process(pipes->fd1, cmd1, envp, end);
 	}
-	child2 = fork();
-	if (child2 == -1)
-		return ((perror("fork")));
-	if (child2 == 0)
-	{
-		child_process_two(pipes->fd2, cmd2, envp, end);
-	}
-	close(end[0]);
-	close(end[1]);
-	waitpid(child1, &status, 0);
-	waitpid(child2, &status, 0);
+	else 
+		parent_process(pipes->fd2, cmd2, envp, end);
 }
 
-void	child_process_one(int fd1, char *cmd1, char *envp[], int *end)
+void	child_process(int fd1, char *cmd1, char *envp[], int *end)
 {
 	char	**good_path;
 	char	*good_line_envp;
@@ -49,9 +39,13 @@ void	child_process_one(int fd1, char *cmd1, char *envp[], int *end)
 	int		i;
 
 	i = 0;
-	dup2(end[1], STDOUT_FILENO);
+
+	if (dup2(end[1], STDOUT_FILENO) == -1)
+		return(perror("dup2"));
+	dup2(fd1, STDIN_FILENO);
 	close(end[0]);
-	close(end[1]);
+	close(fd1);
+
 	while (1)
 	{
 		if (ft_strncmp("PATH", envp[i], 4) ==  0)
@@ -63,7 +57,7 @@ void	child_process_one(int fd1, char *cmd1, char *envp[], int *end)
 		i++;
 	}
 	//printf("good_line du envp : %s\n", good_line_envp);
-	good_path = ft_split(good_line_envp, ':');
+	good_path = ft_split(&good_line_envp[5], ':');
 	int j = -1;
 	i = -1;
 	while (good_path[++i])
@@ -75,7 +69,7 @@ void	child_process_one(int fd1, char *cmd1, char *envp[], int *end)
 	}
 }
 
-void	child_process_two(int fd2, char *cmd2, char *envp[], int *end)
+void	parent_process(int fd2, char *cmd2, char *envp[], int *end)
 {
 	int	status;
 	char	**good_path;
@@ -84,9 +78,11 @@ void	child_process_two(int fd2, char *cmd2, char *envp[], int *end)
 	int		i;
 	
 	i = 0;
+	waitpid(-1, &status, 0);
+	dup2(fd2, STDOUT_FILENO);
 	dup2(end[0], STDIN_FILENO);
-	close(end[0]);
 	close(end[1]);
+	close(fd2);
 	while (1)
 	{
 		if (ft_strncmp("PATH", envp[i], 4) ==  0)
@@ -107,6 +103,7 @@ void	child_process_two(int fd2, char *cmd2, char *envp[], int *end)
 			break ;
 		free(good_cmd);
 	}
+		
 }
 
 int	main(int argc, char *argv[], char *envp[])
@@ -117,10 +114,13 @@ int	main(int argc, char *argv[], char *envp[])
 
 	pipes.fd1 = open(argv[1], O_RDONLY);
 	if (pipes.fd1 < 0)
-		ft_putstr_fd("file1: No such file or directory", 2);
-	pipes.fd2 = open(argv[4], O_RDONLY);
+		ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
+	pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
 	if (pipes.fd2 < 0)
-		ft_putstr_fd("file2: No such file or directory", 2);
+		{
+			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		}
+
 	pipex(&pipes, argv[2], argv[3], envp);
 	close(pipes.fd1);
     close(pipes.fd2);
