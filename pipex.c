@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   src.c                                              :+:      :+:    :+:   */
+/*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/12 01:56:34 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/12 19:19:20 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,14 @@ void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 	{
 		if (pipes->fd1 > 0)
 		{
-			if (child_process(pipes->fd1, cmd1, envp, end) == -1);
-				(exit);
+			if (child_process(pipes->fd1, cmd1, envp, end) == -1)
+				exit(EXIT_FAILURE);
 		}
 	}
 	else
 	{
 		if (parent_process(pipes->fd2, cmd2, envp, end) == -1)
-			(exit);
+			exit(EXIT_FAILURE);
 	}
 }
 
@@ -68,6 +68,7 @@ int	child_process(int fd1, char *cmd1, char *envp[], int *end)
 	}
 	good_path = ft_split(&good_line_envp[5], ':');
 	i = -1;
+	execve(cmd1, ft_split(cmd1, ' '), envp);
 	while (good_path[++i])
 	{
 		good_cmd = ft_strjoin(good_path[i], cmd1);
@@ -75,7 +76,8 @@ int	child_process(int fd1, char *cmd1, char *envp[], int *end)
 			break ;
 		free(good_cmd);
 	}
-	
+	double_free_tab(good_path, i);
+	ft_putstr_fd(": command not found\n", 2, cmd1);
 	return (1);
 }
 
@@ -112,31 +114,34 @@ int	parent_process(int fd2, char *cmd2, char *envp[], int *end)
 	}
 	good_path = ft_split(good_line_envp, ':');
 	i = -1;
+	execve(cmd2, ft_split(cmd2, ' '), envp);
 	while (good_path[++i])
 	{
 		good_cmd = ft_strjoin(good_path[i], cmd2);
-		if (execve(good_cmd, ft_split(cmd2, ' '), envp) != -1)
-			break ;
+		execve(good_cmd, ft_split(cmd2, ' '), envp);
 		free(good_cmd);
 	}
+	double_free_tab(good_path, i);
+	ft_putstr_fd(": command not found\n", 2, cmd2);
 	return (1);
 }
 
 int	main(int argc, char *argv[], char *envp[])
 {
-	int		fd1;
-	int		fd2;
 	t_pipes	pipes;
 
-	pipes.fd1 = open(argv[1], O_RDONLY);
-	if (pipes.fd1 < 0)
-		ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
-	pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
-	if (pipes.fd2 < 0)
+	if (argc == 5)
 	{
-		pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		pipes.fd1 = open(argv[1], O_RDONLY);
+		if (pipes.fd1 < 0)
+			ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
+		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
+		if (pipes.fd2 < 0)
+		{
+			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		}
+		pipex(&pipes, argv[2], argv[3], envp);
+		close(pipes.fd1);
+		close(pipes.fd2);
 	}
-	pipex(&pipes, argv[2], argv[3], envp);
-	close(pipes.fd1);
-	close(pipes.fd2);
 }
