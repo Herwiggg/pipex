@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
+/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/12 19:19:20 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/13 01:57:58 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,26 +57,33 @@ int	child_process(int fd1, char *cmd1, char *envp[], int *end)
 	}
 	close(end[0]);
 	close(fd1);
-	while (envp[i])
-	{
-		if (ft_strncmp("PATH", envp[i], 4) == 0)
-		{
-			good_line_envp = envp[i];
-			break ;
-		}
-		i++;
-	}
-	good_path = ft_split(&good_line_envp[5], ':');
-	i = -1;
+	i = 0;
 	execve(cmd1, ft_split(cmd1, ' '), envp);
-	while (good_path[++i])
+	if (envp[0] != NULL)
 	{
-		good_cmd = ft_strjoin(good_path[i], cmd1);
-		if (execve(good_cmd, ft_split(cmd1, ' '), envp) != -1)
-			break ;
-		free(good_cmd);
+		while (envp[i])
+		{
+			if (ft_strncmp("PATH", envp[i], 4) == 0)
+			{
+				good_line_envp = envp[i];
+				break ;
+			}
+			i++;
+		}
+		if (good_line_envp != NULL)
+		{
+			good_path = ft_split(&good_line_envp[5], ':');
+			i = -1;
+			while (good_path[++i])
+			{
+				good_cmd = ft_strjoin(good_path[i], cmd1);
+				execve(good_cmd, ft_split(cmd1, ' '), envp);
+				free(good_cmd);
+			}
+		}
 	}
-	double_free_tab(good_path, i);
+	if (good_line_envp != NULL)
+		double_free_tab(good_path, i);
 	ft_putstr_fd(": command not found\n", 2, cmd1);
 	return (1);
 }
@@ -103,25 +110,32 @@ int	parent_process(int fd2, char *cmd2, char *envp[], int *end)
 	}
 	close(end[1]);
 	close(fd2);
-	while (envp[i])
-	{
-		if (ft_strncmp("PATH", envp[i], 4) == 0)
-		{
-			good_line_envp = envp[i];
-			break ;
-		}
-		i++;
-	}
-	good_path = ft_split(good_line_envp, ':');
-	i = -1;
 	execve(cmd2, ft_split(cmd2, ' '), envp);
-	while (good_path[++i])
+	if (envp[0] != NULL)
 	{
-		good_cmd = ft_strjoin(good_path[i], cmd2);
-		execve(good_cmd, ft_split(cmd2, ' '), envp);
-		free(good_cmd);
+		while (envp[i])
+		{
+			if (ft_strncmp("PATH", envp[i], 4) == 0)
+			{
+				good_line_envp = envp[i];
+				break ;
+			}
+			i++;
+		}
+		if (good_line_envp != NULL)
+		{
+			good_path = ft_split(good_line_envp, ':');
+			i = -1;
+			while (good_path[++i])
+			{
+				good_cmd = ft_strjoin(good_path[i], cmd2);
+				execve(good_cmd, ft_split(cmd2, ' '), envp);
+				free(good_cmd);
+			}
+		}
 	}
-	double_free_tab(good_path, i);
+	if (good_line_envp != NULL)
+		double_free_tab(good_path, i);
 	ft_putstr_fd(": command not found\n", 2, cmd2);
 	return (1);
 }
