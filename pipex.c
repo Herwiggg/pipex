@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/13 01:57:58 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/14 02:53:23 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,35 +15,44 @@
 void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 {
 	int		end[2];
-	pid_t	child;
-
+	pid_t	child1;
+	pid_t 	child2;
+	int status;
+	
 	if (pipe(end) == -1)
 		return ((perror("pipe")));
-	child = fork();
-	if (child == -1)
+	child1 = fork();
+	if (child1 == -1)
 		return (perror("fork"));
-	if (child == 0)
+	if (child1 == 0)
 	{
 		if (pipes->fd1 > 0)
 		{
-			if (child_process(pipes->fd1, cmd1, envp, end) == -1)
+			if (child_process1(pipes->fd1, cmd1, envp, end) == -1)
 				exit(EXIT_FAILURE);
 		}
 	}
-	else
+	child2 = fork();
+	if (child2 == -1)
+		return (perror("fork"));
+	if (child2 == 0)
 	{
-		if (parent_process(pipes->fd2, cmd2, envp, end) == -1)
-			exit(EXIT_FAILURE);
+		if (child_process2(pipes->fd2, cmd2, envp, end) == -1)
+				exit(EXIT_FAILURE);
 	}
+	close(end[0]);
+	close(end[1]);
+	wait(&status);
+	wait(&status);
 }
 
-int	child_process(int fd1, char *cmd1, char *envp[], int *end)
+int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
 {
 	char	**good_path;
 	char	*good_line_envp;
 	char	*good_cmd;
 	int		i;
-
+	char	**absolut_path;
 	i = 0;
 	if (dup2(end[1], STDOUT_FILENO) == -1)
 	{
@@ -56,9 +65,9 @@ int	child_process(int fd1, char *cmd1, char *envp[], int *end)
 		return (-1);
 	}
 	close(end[0]);
-	close(fd1);
 	i = 0;
-	execve(cmd1, ft_split(cmd1, ' '), envp);
+	absolut_path = ft_split(cmd1, ' ');
+	execve(absolut_path[0], ft_split(cmd1, ' '), envp);
 	if (envp[0] != NULL)
 	{
 		while (envp[i])
@@ -88,16 +97,15 @@ int	child_process(int fd1, char *cmd1, char *envp[], int *end)
 	return (1);
 }
 
-int	parent_process(int fd2, char *cmd2, char *envp[], int *end)
+int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 {
-	int		status;
 	char	**good_path;
 	char	*good_line_envp;
 	char	*good_cmd;
 	int		i;
-
+	char	**absolut_path;
+	
 	i = 0;
-	waitpid(-1, &status, 0);
 	if (dup2(fd2, STDOUT_FILENO) == -1)
 	{
 		perror("dup2");
@@ -110,7 +118,8 @@ int	parent_process(int fd2, char *cmd2, char *envp[], int *end)
 	}
 	close(end[1]);
 	close(fd2);
-	execve(cmd2, ft_split(cmd2, ' '), envp);
+	absolut_path = ft_split(cmd2, ' ');
+	execve(absolut_path[0], ft_split(cmd2, ' '), envp);
 	if (envp[0] != NULL)
 	{
 		while (envp[i])
@@ -149,10 +158,10 @@ int	main(int argc, char *argv[], char *envp[])
 		pipes.fd1 = open(argv[1], O_RDONLY);
 		if (pipes.fd1 < 0)
 			ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
-		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
+		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0777);
 		if (pipes.fd2 < 0)
 		{
-			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 		}
 		pipex(&pipes, argv[2], argv[3], envp);
 		close(pipes.fd1);
