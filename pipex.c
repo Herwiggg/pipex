@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/14 03:52:23 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/14 16:39:43 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,14 @@ int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
 		return (-1);
 	}
 	close(end[0]);
+	close(fd1);
 	i = 0;
 	absolut_path = ft_split(cmd1, ' ');
 	execve(absolut_path[0], ft_split(cmd1, ' '), envp);
+	while (absolut_path[i])
+		i++;
+	double_free_tab(absolut_path, i);
+	i = 0;
 	if (envp[0] != NULL)
 	{
 		while (envp[i])
@@ -121,6 +126,10 @@ int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 	close(fd2);
 	absolut_path = ft_split(cmd2, ' ');
 	execve(absolut_path[0], ft_split(cmd2, ' '), envp);
+	while (absolut_path[i])
+		i++;
+	double_free_tab(absolut_path, i);
+	i = 0;
 	if (envp[0] != NULL)
 	{
 		while (envp[i])
