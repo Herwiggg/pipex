@@ -6,13 +6,13 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/14 16:39:43 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 00:18:43 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
+void	pipex(t_pipes *pipes, char **envp)
 {
 	int		end[2];
 	pid_t	child1;
@@ -28,8 +28,8 @@ void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 			return (perror("fork"));
 		if (child1 == 0)
 		{
-				if (child_process1(pipes->fd1, cmd1, envp, end) == -1)
-					exit(EXIT_FAILURE);
+			if (child_process1(pipes, envp, end) == -1)
+				exit(EXIT_FAILURE);
 		}
 	}
 	child2 = fork();
@@ -37,7 +37,7 @@ void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 		return (perror("fork"));
 	if (child2 == 0)
 	{
-		if (child_process2(pipes->fd2, cmd2, envp, end) == -1)
+		if (child_process2(pipes, envp, end) == -1)
 			exit(EXIT_FAILURE);
 	}
 	close(end[0]);
@@ -46,7 +46,7 @@ void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 	wait(&status);
 }
 
-int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
+int	child_process1(t_pipes *pipes, char *envp[], int *end)
 {
 	char	**good_path;
 	char	*good_line_envp;
@@ -57,19 +57,20 @@ int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
 	i = 0;
 	if (dup2(end[1], STDOUT_FILENO) == -1)
 	{
+		ft_close_all(pipes, end);
 		perror("dup2");
 		return (-1);
 	}
-	if (dup2(fd1, STDIN_FILENO) == -1)
+	if (dup2(pipes->fd1, STDIN_FILENO) == -1)
 	{
 		perror("dup2");
 		return (-1);
 	}
 	close(end[0]);
-	close(fd1);
+	close(pipes->fd1);
 	i = 0;
-	absolut_path = ft_split(cmd1, ' ');
-	execve(absolut_path[0], ft_split(cmd1, ' '), envp);
+	absolut_path = ft_split(pipes->cmd1, ' ');
+	execve(absolut_path[0], ft_split(pipes->cmd1, ' '), envp);
 	while (absolut_path[i])
 		i++;
 	double_free_tab(absolut_path, i);
@@ -91,19 +92,19 @@ int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
 			i = -1;
 			while (good_path[++i])
 			{
-				good_cmd = ft_strjoin(good_path[i], cmd1);
-				execve(good_cmd, ft_split(cmd1, ' '), envp);
+				good_cmd = ft_strjoin(good_path[i], pipes->cmd1);
+				execve(good_cmd, ft_split(pipes->cmd1, ' '), envp);
 				free(good_cmd);
 			}
 		}
 	}
 	if (good_line_envp != NULL)
 		double_free_tab(good_path, i);
-	ft_putstr_fd(": command not found\n", 2, cmd1);
+	ft_putstr_fd(": command not found\n", 2, pipes->cmd1);
 	return (-1);
 }
 
-int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
+int	child_process2(t_pipes *pipes, char *envp[], int *end)
 {
 	char	**good_path;
 	char	*good_line_envp;
@@ -112,7 +113,7 @@ int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 	char	**absolut_path;
 
 	i = 0;
-	if (dup2(fd2, STDOUT_FILENO) == -1)
+	if (dup2(pipes->fd2, STDOUT_FILENO) == -1)
 	{
 		perror("dup2");
 		return (-1);
@@ -123,9 +124,9 @@ int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 		return (-1);
 	}
 	close(end[1]);
-	close(fd2);
-	absolut_path = ft_split(cmd2, ' ');
-	execve(absolut_path[0], ft_split(cmd2, ' '), envp);
+	close(pipes->fd2);
+	absolut_path = ft_split(pipes->cmd2, ' ');
+	execve(absolut_path[0], ft_split(pipes->cmd2, ' '), envp);
 	while (absolut_path[i])
 		i++;
 	double_free_tab(absolut_path, i);
@@ -147,15 +148,15 @@ int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 			i = -1;
 			while (good_path[++i])
 			{
-				good_cmd = ft_strjoin(good_path[i], cmd2);
-				execve(good_cmd, ft_split(cmd2, ' '), envp);
+				good_cmd = ft_strjoin(good_path[i], pipes->cmd2);
+				execve(good_cmd, ft_split(pipes->cmd2, ' '), envp);
 				free(good_cmd);
 			}
 		}
 	}
 	if (good_line_envp != NULL)
 		double_free_tab(good_path, i);
-	ft_putstr_fd(": command not found\n", 2, cmd2);
+	ft_putstr_fd(": command not found\n", 2, pipes->cmd2);
 	return (-1);
 }
 
@@ -163,18 +164,28 @@ int	main(int argc, char *argv[], char *envp[])
 {
 	t_pipes	pipes;
 
+	pipes.cmd1 = argv[2];
+	pipes.cmd2 = argv[3];
 	if (argc == 5)
 	{
-		pipes.fd1 = open(argv[1], O_RDONLY);
-		if (pipes.fd1 < 0)
+		if (access(argv[1], F_OK) != 0)
 			ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
-		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0777);
+		else
+			pipes.fd1 = open(argv[1], O_RDONLY);
+		if (pipes.fd1 < 0)
+		{
+			if (access(argv[1], R_OK) != 0)
+				ft_putstr_fd(": Permission denied\n", 2, argv[1]);
+		}
+		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
 		if (pipes.fd2 < 0)
 		{
 			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 		}
-		pipex(&pipes, argv[2], argv[3], envp);
+		pipex(&pipes, envp);
 		close(pipes.fd1);
 		close(pipes.fd2);
 	}
+	else
+		ft_putstr_error("Wrong number of arguments. Ex: ./pipex <file1> <cmd1> <cmd2> <file2>\n");
 }
