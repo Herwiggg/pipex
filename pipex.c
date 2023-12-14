@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/14 02:53:23 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/14 03:52:23 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,20 @@ void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 {
 	int		end[2];
 	pid_t	child1;
-	pid_t 	child2;
-	int status;
-	
+	pid_t	child2;
+	int		status;
+
 	if (pipe(end) == -1)
 		return ((perror("pipe")));
-	child1 = fork();
-	if (child1 == -1)
-		return (perror("fork"));
-	if (child1 == 0)
+	if (pipes->fd1 > 0)
 	{
-		if (pipes->fd1 > 0)
+		child1 = fork();
+		if (child1 == -1)
+			return (perror("fork"));
+		if (child1 == 0)
 		{
-			if (child_process1(pipes->fd1, cmd1, envp, end) == -1)
-				exit(EXIT_FAILURE);
+				if (child_process1(pipes->fd1, cmd1, envp, end) == -1)
+					exit(EXIT_FAILURE);
 		}
 	}
 	child2 = fork();
@@ -38,7 +38,7 @@ void	pipex(t_pipes *pipes, char *cmd1, char *cmd2, char **envp)
 	if (child2 == 0)
 	{
 		if (child_process2(pipes->fd2, cmd2, envp, end) == -1)
-				exit(EXIT_FAILURE);
+			exit(EXIT_FAILURE);
 	}
 	close(end[0]);
 	close(end[1]);
@@ -53,6 +53,7 @@ int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
 	char	*good_cmd;
 	int		i;
 	char	**absolut_path;
+
 	i = 0;
 	if (dup2(end[1], STDOUT_FILENO) == -1)
 	{
@@ -94,7 +95,7 @@ int	child_process1(int fd1, char *cmd1, char *envp[], int *end)
 	if (good_line_envp != NULL)
 		double_free_tab(good_path, i);
 	ft_putstr_fd(": command not found\n", 2, cmd1);
-	return (1);
+	return (-1);
 }
 
 int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
@@ -104,7 +105,7 @@ int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 	char	*good_cmd;
 	int		i;
 	char	**absolut_path;
-	
+
 	i = 0;
 	if (dup2(fd2, STDOUT_FILENO) == -1)
 	{
@@ -146,7 +147,7 @@ int	child_process2(int fd2, char *cmd2, char *envp[], int *end)
 	if (good_line_envp != NULL)
 		double_free_tab(good_path, i);
 	ft_putstr_fd(": command not found\n", 2, cmd2);
-	return (1);
+	return (-1);
 }
 
 int	main(int argc, char *argv[], char *envp[])
