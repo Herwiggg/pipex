@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:27:01 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 00:19:44 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 01:55:53 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,26 +22,35 @@
 
 typedef struct s_pipes
 {
-	int	fd1;
-	int	fd2;
-	char *cmd1;
-	char *cmd2;
-}		t_pipes;
+	int		fd1;
+	int		fd2;
+	char	*cmd1;
+	char	*cmd2;
+}			t_pipes;
 
-char	**ft_split(char const *s, char c);
-char	**ft_doublefree(char **tab, int k);
-char	**ft_strcpy(char **tab, const char *s, char c);
-int		ft_count_words(const char *s, char c);
-char	*ft_strjoin(char const *s1, char const *s2);
-int		ft_strlen_space(const char *str);
-int		ft_strlen(const char *str);
-void	pipex(t_pipes *pipes, char *envp[]);
-int		child_process1(t_pipes *pipes, char *envp[], int *end);
-int		child_process2(t_pipes *pipes, char *envp[], int *end);
-void	ft_putstr_fd(char *s, int fd, char *str);
-int		ft_strncmp(const char *s1, const char *s2, size_t n);
-char	*ft_strjoin_error(char const *s1, char const *s2);
-void	double_free_tab(char **tab, int k);
-void	ft_putstr_error(char *str);
-void	ft_close_all(t_pipes *pipes, int *end);
+/*-------Parsing-------*/
+t_pipes		init_struct(char *argv[]);
+char		**ft_split(char const *s, char c);
+char		**ft_doublefree(char **tab, int k);
+char		**ft_strcpy(char **tab, const char *s, char c);
+int			ft_count_words(const char *s, char c);
+char		*ft_strjoin(char const *s1, char const *s2);
+int			ft_strlen_space(const char *str);
+int			ft_strlen(const char *str);
+int			ft_strncmp(const char *s1, const char *s2, size_t n);
+
+/*-------Process functions-------*/
+void		pipex(t_pipes *pipes, char *envp[]);
+int			child_process1(t_pipes *pipes, char *envp[], int *end);
+int			child_process2(t_pipes *pipes, char *envp[], int *end);
+int			ft_dup2_one(t_pipes *pipes, int *end);
+int			ft_dup2_two(t_pipes *pipes, int *end);
+
+/*-------Error handling-------*/
+void		ft_putstr_fd(char *s, int fd, char *str);
+char		*ft_strjoin_error(char const *s1, char const *s2);
+void		double_free_tab(char **tab, int k);
+void		ft_putstr_error(char *str);
+void		ft_close_all(t_pipes *pipes, int *end);
+
 #endif

@@ -6,47 +6,50 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/07 19:52:13 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 00:20:32 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 03:03:49 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	ft_putstr_fd(char *s, int fd, char *str)
+t_pipes	init_struct(char *argv[])
 {
-	int		total;
-	char	*error;
-
-	error = ft_strjoin_error(str, s);
-	total = ft_strlen(error);
-	write(fd, error, total);
-	free(error);
+	t_pipes pipes;
+	
+	pipes.cmd1 = argv[2];
+	pipes.cmd2 = argv[3];
+	return (pipes);
 }
-
-int	ft_strncmp(const char *s1, const char *s2, size_t n)
+int	ft_dup2_one(t_pipes *pipes, int *end)
 {
-	size_t	i;
-
-	i = 0;
-	while ((s1[i] || s2[i]) && i < n)
+	if (dup2(end[1], STDOUT_FILENO) == -1)
 	{
-		if (s1[i] != s2[i])
-			return (((unsigned char *)s1)[i] - ((unsigned char *)s2)[i]);
-		i++;
+		ft_close_all(pipes, end);
+		perror("dup2");
+		return (-1);
 	}
-	return (0);
+	if (dup2(pipes->fd1, STDIN_FILENO) == -1)
+	{
+		ft_close_all(pipes, end);
+		perror("dup2");
+		return (-1);
+	}
+	return (1);
 }
-void	ft_close_all(t_pipes *pipes, int *end)
-{
-	close(pipes->fd1);
-	close(pipes->fd2);
-	close(end[0]);
-	close(end[1]);
-}
-void 	ft_putstr_error(char *str)
-{
-	int total;
 
-	total = ft_strlen(str);
-	write(2, str, total);
+int	ft_dup2_two(t_pipes *pipes, int *end)
+{
+	if (dup2(pipes->fd2, STDOUT_FILENO) == -1)
+	{
+		ft_close_all(pipes, end);
+		perror("dup2");
+		return (-1);
+	}
+	if (dup2(end[0], STDIN_FILENO) == -1)
+	{
+		ft_close_all(pipes, end);
+		perror("dup2");
+		return (-1);
+	}
+	return (1);
 }

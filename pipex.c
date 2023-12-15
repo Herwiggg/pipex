@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 00:18:43 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 03:02:12 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,8 +40,7 @@ void	pipex(t_pipes *pipes, char **envp)
 		if (child_process2(pipes, envp, end) == -1)
 			exit(EXIT_FAILURE);
 	}
-	close(end[0]);
-	close(end[1]);
+	ft_close_all(pipes, end);
 	wait(&status);
 	wait(&status);
 }
@@ -55,17 +54,8 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 	char	**absolut_path;
 
 	i = 0;
-	if (dup2(end[1], STDOUT_FILENO) == -1)
-	{
-		ft_close_all(pipes, end);
-		perror("dup2");
+	if (ft_dup2_one(pipes, end) == -1)
 		return (-1);
-	}
-	if (dup2(pipes->fd1, STDIN_FILENO) == -1)
-	{
-		perror("dup2");
-		return (-1);
-	}
 	close(end[0]);
 	close(pipes->fd1);
 	i = 0;
@@ -113,16 +103,8 @@ int	child_process2(t_pipes *pipes, char *envp[], int *end)
 	char	**absolut_path;
 
 	i = 0;
-	if (dup2(pipes->fd2, STDOUT_FILENO) == -1)
-	{
-		perror("dup2");
+	if (ft_dup2_two(pipes, end) == -1)
 		return (-1);
-	}
-	if (dup2(end[0], STDIN_FILENO) == -1)
-	{
-		perror("dup2");
-		return (-1);
-	}
 	close(end[1]);
 	close(pipes->fd2);
 	absolut_path = ft_split(pipes->cmd2, ' ');
@@ -164,8 +146,7 @@ int	main(int argc, char *argv[], char *envp[])
 {
 	t_pipes	pipes;
 
-	pipes.cmd1 = argv[2];
-	pipes.cmd2 = argv[3];
+	pipes = init_struct(argv);
 	if (argc == 5)
 	{
 		if (access(argv[1], F_OK) != 0)
@@ -178,10 +159,10 @@ int	main(int argc, char *argv[], char *envp[])
 				ft_putstr_fd(": Permission denied\n", 2, argv[1]);
 		}
 		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
+		if(access(argv[4], W_OK) == -1 && access(argv[4], F_OK) == 0)
+			ft_putstr_fd(": Permission denied\n", 2, argv[4]);
 		if (pipes.fd2 < 0)
-		{
 			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-		}
 		pipex(&pipes, envp);
 		close(pipes.fd1);
 		close(pipes.fd2);

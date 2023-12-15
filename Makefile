@@ -1,18 +1,23 @@
-NAME = pipex.a
+NAME = pipex
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
-MSRC = pipex.c utils.c parsing.c parsincv2.c 
+MSRC = pipex.c utils.c utilsv2.c parsing.c parsingv2.c 
 
-MOBJ = ${MSRC:.c=.o}
+MOBJ = $(MSRC:.c=.o)
 
-all : $(NAME)
+all: $(NAME)
 
-$(NAME) : $(MOBJ) pipex.h
-	@ar rc $(NAME) $(MOBJ)
-	@${CC} ${CFLAGS} pipex.c ${NAME} -o pipex
-clean :
-	@${RM} ${MOBJ}
-fclean : clean
-	@${RM} $(NAME) pipex
-re : fclean all
+%.o: %.c
+	$(CC)	$(CFLAGS) -c $< -o $@
+
+$(NAME): $(MOBJ)
+	$(CC) $(CFLAGS) -o $(NAME) $(MOBJ)
+
+clean:
+	$(RM) $(MOBJ)
+
+fclean: clean
+	$(RM) $(NAME)
+
+re: fclean all
