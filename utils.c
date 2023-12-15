@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/07 19:52:13 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 03:03:49 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 15:50:32 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,13 @@
 
 t_pipes	init_struct(char *argv[])
 {
-	t_pipes pipes;
-	
+	t_pipes	pipes;
+
 	pipes.cmd1 = argv[2];
 	pipes.cmd2 = argv[3];
 	return (pipes);
 }
+
 int	ft_dup2_one(t_pipes *pipes, int *end)
 {
 	if (dup2(end[1], STDOUT_FILENO) == -1)
@@ -52,4 +53,58 @@ int	ft_dup2_two(t_pipes *pipes, int *end)
 		return (-1);
 	}
 	return (1);
+}
+
+void	ft_relative_path1(t_pipes *pipes, char **envp, int i)
+{
+	if (envp[0] != NULL)
+	{
+		while (envp[i])
+		{
+			if (ft_strncmp("PATH", envp[i], 4) == 0)
+				pipes->good_line_envp = envp[i];
+			i++;
+		}
+		if (pipes->good_line_envp != NULL)
+		{
+			pipes->good_path = ft_split(pipes->good_line_envp, ':');
+			i = -1;
+			while (pipes->good_path[++i])
+			{
+				pipes->good_cmd = ft_strjoin(pipes->good_path[i], pipes->cmd1);
+				execve(pipes->good_cmd, ft_split(pipes->cmd1, ' '), envp);
+				free(pipes->good_cmd);
+			}
+		}
+	}
+	if (pipes->good_line_envp != NULL)
+		double_free_tab(pipes->good_path, i);
+	ft_putstr_fd(": command not found\n", 2, pipes->cmd1);
+}
+
+void	ft_relative_path2(t_pipes *pipes, char **envp, int i)
+{
+	if (envp[0] != NULL)
+	{
+		while (envp[i])
+		{
+			if (ft_strncmp("PATH", envp[i], 4) == 0)
+				pipes->good_line_envp = envp[i];
+			i++;
+		}
+		if (pipes->good_line_envp != NULL)
+		{
+			pipes->good_path = ft_split(pipes->good_line_envp, ':');
+			i = -1;
+			while (pipes->good_path[++i])
+			{
+				pipes->good_cmd = ft_strjoin(pipes->good_path[i], pipes->cmd2);
+				execve(pipes->good_cmd, ft_split(pipes->cmd2, ' '), envp);
+				free(pipes->good_cmd);
+			}
+		}
+	}
+	if (pipes->good_line_envp != NULL)
+		double_free_tab(pipes->good_path, i);
+	ft_putstr_fd(": command not found\n", 2, pipes->cmd2);
 }

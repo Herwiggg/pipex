@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 03:02:12 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 15:45:29 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,42 +14,32 @@
 
 void	pipex(t_pipes *pipes, char **envp)
 {
-	int		end[2];
-	pid_t	child1;
-	pid_t	child2;
-	int		status;
+	int	end[2];
 
 	if (pipe(end) == -1)
 		return ((perror("pipe")));
 	if (pipes->fd1 > 0)
 	{
-		child1 = fork();
-		if (child1 == -1)
+		pipes->child1 = fork();
+		if (pipes->child1 == -1)
 			return (perror("fork"));
-		if (child1 == 0)
-		{
+		if (pipes->child1 == 0)
 			if (child_process1(pipes, envp, end) == -1)
 				exit(EXIT_FAILURE);
-		}
 	}
-	child2 = fork();
-	if (child2 == -1)
+	pipes->child2 = fork();
+	if (pipes->child2 == -1)
 		return (perror("fork"));
-	if (child2 == 0)
-	{
+	if (pipes->child2 == 0)
 		if (child_process2(pipes, envp, end) == -1)
 			exit(EXIT_FAILURE);
-	}
 	ft_close_all(pipes, end);
-	wait(&status);
-	wait(&status);
+	wait(pipes->status);
+	wait(pipes->status);
 }
 
 int	child_process1(t_pipes *pipes, char *envp[], int *end)
 {
-	char	**good_path;
-	char	*good_line_envp;
-	char	*good_cmd;
 	int		i;
 	char	**absolut_path;
 
@@ -65,40 +55,12 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 		i++;
 	double_free_tab(absolut_path, i);
 	i = 0;
-	if (envp[0] != NULL)
-	{
-		while (envp[i])
-		{
-			if (ft_strncmp("PATH", envp[i], 4) == 0)
-			{
-				good_line_envp = envp[i];
-				break ;
-			}
-			i++;
-		}
-		if (good_line_envp != NULL)
-		{
-			good_path = ft_split(&good_line_envp[5], ':');
-			i = -1;
-			while (good_path[++i])
-			{
-				good_cmd = ft_strjoin(good_path[i], pipes->cmd1);
-				execve(good_cmd, ft_split(pipes->cmd1, ' '), envp);
-				free(good_cmd);
-			}
-		}
-	}
-	if (good_line_envp != NULL)
-		double_free_tab(good_path, i);
-	ft_putstr_fd(": command not found\n", 2, pipes->cmd1);
+	ft_relative_path1(pipes, envp, i);
 	return (-1);
 }
 
 int	child_process2(t_pipes *pipes, char *envp[], int *end)
 {
-	char	**good_path;
-	char	*good_line_envp;
-	char	*good_cmd;
 	int		i;
 	char	**absolut_path;
 
@@ -113,32 +75,7 @@ int	child_process2(t_pipes *pipes, char *envp[], int *end)
 		i++;
 	double_free_tab(absolut_path, i);
 	i = 0;
-	if (envp[0] != NULL)
-	{
-		while (envp[i])
-		{
-			if (ft_strncmp("PATH", envp[i], 4) == 0)
-			{
-				good_line_envp = envp[i];
-				break ;
-			}
-			i++;
-		}
-		if (good_line_envp != NULL)
-		{
-			good_path = ft_split(good_line_envp, ':');
-			i = -1;
-			while (good_path[++i])
-			{
-				good_cmd = ft_strjoin(good_path[i], pipes->cmd2);
-				execve(good_cmd, ft_split(pipes->cmd2, ' '), envp);
-				free(good_cmd);
-			}
-		}
-	}
-	if (good_line_envp != NULL)
-		double_free_tab(good_path, i);
-	ft_putstr_fd(": command not found\n", 2, pipes->cmd2);
+	ft_relative_path2(pipes, envp, i);
 	return (-1);
 }
 
@@ -159,7 +96,7 @@ int	main(int argc, char *argv[], char *envp[])
 				ft_putstr_fd(": Permission denied\n", 2, argv[1]);
 		}
 		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
-		if(access(argv[4], W_OK) == -1 && access(argv[4], F_OK) == 0)
+		if (access(argv[4], W_OK) == -1 && access(argv[4], F_OK) == 0)
 			ft_putstr_fd(": Permission denied\n", 2, argv[4]);
 		if (pipes.fd2 < 0)
 			pipes.fd2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
@@ -168,5 +105,5 @@ int	main(int argc, char *argv[], char *envp[])
 		close(pipes.fd2);
 	}
 	else
-		ft_putstr_error("Wrong number of arguments. Ex: ./pipex <file1> <cmd1> <cmd2> <file2>\n");
+		ft_putstr_errr("Wrong number of args: <file1> <cmd1> <cmd2> <file2>\n");
 }

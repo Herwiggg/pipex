@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:27:01 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 01:55:53 by almichel         ###   ########.fr       */
+/*   Updated: 2023/12/15 15:48:31 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,16 @@
 
 typedef struct s_pipes
 {
+	pid_t	child1;
+	pid_t	child2;
 	int		fd1;
 	int		fd2;
 	char	*cmd1;
 	char	*cmd2;
+	char	*good_line_envp;
+	char	**good_path;
+	char	*good_cmd;
+	int		*status;
 }			t_pipes;
 
 /*-------Parsing-------*/
@@ -45,12 +51,14 @@ int			child_process1(t_pipes *pipes, char *envp[], int *end);
 int			child_process2(t_pipes *pipes, char *envp[], int *end);
 int			ft_dup2_one(t_pipes *pipes, int *end);
 int			ft_dup2_two(t_pipes *pipes, int *end);
+void		ft_relative_path1(t_pipes *pipes, char **envp, int i);
+void		ft_relative_path2(t_pipes *pipes, char **envp, int i);
 
 /*-------Error handling-------*/
 void		ft_putstr_fd(char *s, int fd, char *str);
 char		*ft_strjoin_error(char const *s1, char const *s2);
 void		double_free_tab(char **tab, int k);
-void		ft_putstr_error(char *str);
+void		ft_putstr_errr(char *str);
 void		ft_close_all(t_pipes *pipes, int *end);
 
 #endif

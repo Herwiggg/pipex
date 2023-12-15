@@ -2,7 +2,7 @@ NAME = pipex
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 RM = rm -f
-MSRC = pipex.c utils.c utilsv2.c parsing.c parsingv2.c 
+MSRC = pipex.c utils.c utilsv2.c parsing.c error.c 
 
 MOBJ = $(MSRC:.c=.o)
 
