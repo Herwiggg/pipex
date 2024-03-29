@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/07 19:52:13 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 15:50:32 by almichel         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:26:09 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ t_pipes	init_struct(char *argv[])
 
 	pipes.cmd1 = argv[2];
 	pipes.cmd2 = argv[3];
+	pipes.fd1 = -1;
+	pipes.fd2 = -1;
 	return (pipes);
 }
 

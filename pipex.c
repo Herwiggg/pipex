@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 15:45:29 by almichel         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:47:05 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,11 +90,9 @@ int	main(int argc, char *argv[], char *envp[])
 			ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
 		else
 			pipes.fd1 = open(argv[1], O_RDONLY);
-		if (pipes.fd1 < 0)
-		{
+		if (pipes.fd1 >= 0)
 			if (access(argv[1], R_OK) != 0)
 				ft_putstr_fd(": Permission denied\n", 2, argv[1]);
-		}
 		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
 		if (access(argv[4], W_OK) == -1 && access(argv[4], F_OK) == 0)
 			ft_putstr_fd(": Permission denied\n", 2, argv[4]);
