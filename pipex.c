@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2024/03/29 18:47:05 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/04 20:05:43 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 	if (ft_dup2_one(pipes, end) == -1)
 		return (-1);
 	close(end[0]);
+	close(end[1]);
 	close(pipes->fd1);
 	i = 0;
 	absolut_path = ft_split(pipes->cmd1, ' ');
@@ -68,6 +69,7 @@ int	child_process2(t_pipes *pipes, char *envp[], int *end)
 	if (ft_dup2_two(pipes, end) == -1)
 		return (-1);
 	close(end[1]);
+	close(end[0]);
 	close(pipes->fd2);
 	absolut_path = ft_split(pipes->cmd2, ' ');
 	execve(absolut_path[0], ft_split(pipes->cmd2, ' '), envp);
@@ -89,10 +91,11 @@ int	main(int argc, char *argv[], char *envp[])
 		if (access(argv[1], F_OK) != 0)
 			ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
 		else
+		{
 			pipes.fd1 = open(argv[1], O_RDONLY);
-		if (pipes.fd1 >= 0)
 			if (access(argv[1], R_OK) != 0)
 				ft_putstr_fd(": Permission denied\n", 2, argv[1]);
+		}
 		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
 		if (access(argv[4], W_OK) == -1 && access(argv[4], F_OK) == 0)
 			ft_putstr_fd(": Permission denied\n", 2, argv[4]);
