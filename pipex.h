@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
+/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:27:01 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/05 18:35:57 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/06 00:36:18 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,8 @@ typedef struct s_pipes
 	int		fd2;
 	char	*cmd1;
 	char	*cmd2;
+	char	**splited_cmd1;
+	char	**splited_cmd2;
 	char	*good_line_envp;
 	char	**good_path;
 	char	*good_cmd;
@@ -45,6 +47,7 @@ int			ft_strlen_space(const char *str);
 int			ft_strlen(const char *str);
 int			ft_strncmp(const char *s1, const char *s2, size_t n);
 int			ft_count_height(char **tab);
+void		ft_free_cmd(char **cmd);
 
 /*-------Process functions-------*/
 void		pipex(t_pipes *pipes, char *envp[]);

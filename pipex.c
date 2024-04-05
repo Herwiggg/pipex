@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
+/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/05 19:30:17 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/06 00:45:30 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 	int		i;
 	char	**absolut_path;
 	char	**cmd1;
-	
+
 	cmd1 = ft_split(pipes->cmd1, ' ');
 	i = 0;
 	if (ft_dup2_one(pipes, end) == -1)
@@ -52,13 +52,13 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 	close(end[1]);
 	close(pipes->fd1);
 	absolut_path = ft_split(pipes->cmd1, ' ');
-	execve(absolut_path[0], ft_split(pipes->cmd1, ' '), envp);
+	execve(absolut_path[0], cmd1, envp);
 	while (absolut_path[i])
 		i++;
 	double_free_tab(absolut_path, i);
 	i = 0;
 	ft_relative_path1(pipes, envp, i);
-	while(cmd1[i] != NULL)
+	while (cmd1[i] != NULL)
 	{
 		free(cmd1[i]);
 		i++;
@@ -71,7 +71,7 @@ int	child_process2(t_pipes *pipes, char *envp[], int *end)
 {
 	int		i;
 	char	**absolut_path;	
-	char **cmd2;
+	char	**cmd2;
 
 	cmd2 = ft_split(pipes->cmd2, ' ');
 	i = 0;
@@ -87,7 +87,7 @@ int	child_process2(t_pipes *pipes, char *envp[], int *end)
 	double_free_tab(absolut_path, i);
 	i = 0;
 	ft_relative_path2(pipes, envp, i);
-	while(cmd2[i] != NULL)
+	while (cmd2[i] != NULL)
 	{
 		free(cmd2[i]);
 		i++;
