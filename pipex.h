@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:27:01 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 15:48:31 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/05 18:35:57 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ char		*ft_strjoin(char const *s1, char const *s2);
 int			ft_strlen_space(const char *str);
 int			ft_strlen(const char *str);
 int			ft_strncmp(const char *s1, const char *s2, size_t n);
+int			ft_count_height(char **tab);
 
 /*-------Process functions-------*/
 void		pipex(t_pipes *pipes, char *envp[]);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utilsv2.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/15 02:43:23 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 15:52:02 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/05 19:14:44 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,4 +67,21 @@ char	*ft_strjoin(char const *s1, char const *s2)
 		tab[j++] = s2[i++];
 	tab[j] = '\0';
 	return (tab);
+}
+
+int	ft_count_height(char **tab)
+{
+	int	i;
+	int	j;
+
+	i = 0;
+	j = 0;
+	while (tab[i])
+	{
+		j = 0;
+		while (tab[i][j])
+			j++;
+		i++;
+	}
+	return (i);
 }
