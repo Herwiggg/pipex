@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:27:01 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/06 00:36:18 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/09 16:04:27 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct s_pipes
 	pid_t	child2;
 	int		fd1;
 	int		fd2;
+	int		flag1;
 	char	*cmd1;
 	char	*cmd2;
 	char	**splited_cmd1;

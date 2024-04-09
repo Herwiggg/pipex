@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/07 19:52:13 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/06 00:51:36 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/09 16:05:47 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ t_pipes	init_struct(char *argv[])
 {
 	t_pipes	pipes;
 
+	pipes.flag1 = 0;
 	pipes.cmd1 = argv[2];
 	pipes.cmd2 = argv[3];
 	pipes.fd1 = -1;

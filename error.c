@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   error.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
+/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/07 15:38:06 by almichel          #+#    #+#             */
-/*   Updated: 2023/12/15 15:51:50 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/09 16:06:03 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,8 @@ void	ft_putstr_fd(char *s, int fd, char *str)
 
 void	ft_close_all(t_pipes *pipes, int *end)
 {
-	close(pipes->fd1);
+	if (pipes->flag1 == 0)
+		close(pipes->fd1);
 	close(pipes->fd2);
 	close(end[0]);
 	close(end[1]);
