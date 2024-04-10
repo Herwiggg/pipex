@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
+/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/09 17:52:57 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/10 14:05:01 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,13 +57,10 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 	while (absolut_path[i])
 		i++;
 	double_free_tab(absolut_path, i);
-	i = 0;
+	i = -1;
 	ft_relative_path1(pipes, envp, i);
-	while (cmd1[i] != NULL)
-	{
+	while (cmd1[++i] != NULL)
 		free(cmd1[i]);
-		i++;
-	}
 	free(cmd1);
 	return (-1);
 }
@@ -71,7 +68,7 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 int	child_process2(t_pipes *pipes, char *envp[], int *end)
 {
 	int		i;
-	char	**absolut_path;	
+	char	**absolut_path;
 	char	**cmd2;
 
 	cmd2 = ft_split(pipes->cmd2, ' ');
@@ -97,6 +94,23 @@ int	child_process2(t_pipes *pipes, char *envp[], int *end)
 	return (-1);
 }
 
+void	init_fd1(char **argv, t_pipes *pipes)
+{
+	if (access(argv[1], F_OK) != 0)
+	{
+		ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
+		pipes->flag1 = 1;
+	}
+	else
+	{
+		pipes->fd1 = open(argv[1], O_RDONLY);
+		if (pipes->fd1 < 0)
+			pipes->flag1 = 1;
+		if (access(argv[1], R_OK) != 0)
+			ft_putstr_fd(": Permission denied\n", 2, argv[1]);
+	}
+}
+
 int	main(int argc, char *argv[], char *envp[])
 {
 	t_pipes	pipes;
@@ -104,19 +118,7 @@ int	main(int argc, char *argv[], char *envp[])
 	pipes = init_struct(argv);
 	if (argc == 5)
 	{
-		if (access(argv[1], F_OK) != 0)
-		{
-			ft_putstr_fd(": No such file or directory\n", 2, argv[1]);
-			pipes.flag1 = 1;
-		}
-		else
-		{
-			pipes.fd1 = open(argv[1], O_RDONLY);
-			if (pipes.fd1 < 0)
-				pipes.flag1 = 1;
-			if (access(argv[1], R_OK) != 0)
-				ft_putstr_fd(": Permission denied\n", 2, argv[1]);
-		}
+		init_fd1(argv, &pipes);
 		pipes.fd2 = open(argv[4], O_WRONLY | O_TRUNC, 0644);
 		if (access(argv[4], W_OK) == -1 && access(argv[4], F_OK) == 0)
 		{

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: almichel <	almichel@student.42.fr>         +#+  +:+       +#+        */
+/*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:27:01 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/09 16:04:27 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/10 13:56:16 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,7 @@ int			ft_dup2_one(t_pipes *pipes, int *end);
 int			ft_dup2_two(t_pipes *pipes, int *end);
 void		ft_relative_path1(t_pipes *pipes, char **envp, int i);
 void		ft_relative_path2(t_pipes *pipes, char **envp, int i);
+void		init_fd1(char **argv, t_pipes *pipes);
 
 /*-------Error handling-------*/
 void		ft_putstr_fd(char *s, int fd, char *str);
