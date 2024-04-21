@@ -6,7 +6,7 @@
 /*   By: almichel <almichel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/06 22:10:48 by almichel          #+#    #+#             */
-/*   Updated: 2024/04/10 14:05:01 by almichel         ###   ########.fr       */
+/*   Updated: 2024/04/21 18:34:24 by almichel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,9 @@ int	child_process1(t_pipes *pipes, char *envp[], int *end)
 	while (absolut_path[i])
 		i++;
 	double_free_tab(absolut_path, i);
-	i = -1;
+	i = 0;
 	ft_relative_path1(pipes, envp, i);
+	i = -1;
 	while (cmd1[++i] != NULL)
 		free(cmd1[i]);
 	free(cmd1);
